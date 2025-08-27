@@ -1,16 +1,12 @@
 use diesel::{QueryDsl, RunQueryDsl, SelectableHelper};
 
+use crate::repository::DbError;
 use crate::schema::users::dsl::users;
 use crate::{
     db::DbPool,
-    models::{NewUser, User},
+    models::user::{NewUser, User},
     service::user::CreateUser,
 };
-pub enum DbError {
-    InvalidField,
-    UniqueViolation,
-    DbConnError(String),
-}
 
 pub fn create_user(user_info: CreateUser, pool: DbPool) -> Result<User, DbError> {
     let mut conn = pool.get().expect("error gettin connection");

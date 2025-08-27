@@ -1,14 +1,15 @@
 mod db;
 mod models;
 mod repository;
+mod routes;
 mod schema;
 mod service;
 
 use crate::db::{create_pool, DbPool};
-use crate::service::user::user_routes;
+use crate::routes::task::task_routes;
+use crate::routes::user::user_routes;
 use axum::{routing::get, Router};
 use std::env;
-// use diesel_demo::*;
 
 #[tokio::main]
 async fn main() {
@@ -18,7 +19,8 @@ async fn main() {
 
     let app = Router::new()
         .route("/", get(|| async { "Hello, world!" }))
-        .merge(user_routes(pool.clone()));
+        .merge(user_routes(pool.clone()))
+        .merge(task_routes(pool.clone()));
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
 

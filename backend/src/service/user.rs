@@ -1,8 +1,6 @@
-use crate::repository::user::DbError;
-use crate::{db::DbPool, models::*};
-use crate::{models, repository};
-use axum::routing::get;
-use axum::Router;
+use crate::repository;
+use crate::repository::DbError;
+use crate::{db::DbPool, models::user::*};
 use axum::{extract::State, http::StatusCode, response::Json};
 use serde::Deserialize;
 
@@ -12,16 +10,10 @@ pub struct CreateUser {
     pub password: String,
 }
 
-pub fn user_routes(pool: DbPool) -> Router {
-    Router::new()
-        .route("/users", get(get_users).post(create_user))
-        .with_state(pool)
-}
-
 pub async fn create_user(
     State(pool): State<DbPool>,
     Json(payload): Json<CreateUser>,
-) -> Result<Json<models::User>, (StatusCode, String)> {
+) -> Result<Json<User>, (StatusCode, String)> {
     let result = repository::user::create_user(payload, pool);
     match result {
         Ok(user) => Ok(Json(user)),
