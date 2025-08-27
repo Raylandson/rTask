@@ -1,6 +1,9 @@
 use crate::schema::tasks;
-use diesel::{prelude::Queryable, Selectable};
-use serde::Serialize;
+use diesel::{
+    prelude::{Insertable, Queryable},
+    Selectable,
+};
+use serde::{Deserialize, Serialize};
 
 #[derive(Queryable, Selectable, Serialize)]
 #[diesel(table_name = tasks)]
@@ -12,7 +15,8 @@ pub struct Task {
     pub description: Option<String>,
     pub completed: bool,
 }
-
+#[derive(Insertable, Serialize, Deserialize)]
+#[diesel(table_name = tasks)]
 pub struct NewTask<'a> {
     pub user_id: i32,
     pub title: &'a str,
