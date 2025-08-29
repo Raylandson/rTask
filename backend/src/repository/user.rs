@@ -1,5 +1,3 @@
-use diesel::{QueryDsl, RunQueryDsl, SelectableHelper};
-
 use crate::repository::DbError;
 use crate::schema::users::dsl::users;
 use crate::{
@@ -7,12 +5,24 @@ use crate::{
     models::user::{NewUser, User},
     service::user::CreateUser,
 };
+use argon2::{
+    password_hash::{rand_core::OsRng, PasswordHasher, SaltString},
+    Argon2,
+};
+
+use diesel::{QueryDsl, RunQueryDsl, SelectableHelper};
 
 pub fn create_user(user_info: CreateUser, pool: DbPool) -> Result<User, DbError> {
     let mut conn = pool.get().expect("error gettin connection");
+    let salt = SaltString::generate(&mut OsRng);
+    let argon2 = Argon2::default();
+    let password_hash = argon2
+        .hash_password(user_info.password.as_bytes(), &salt)
+        .map_err(|_| DbError::DbConnError("Password hashing failed".to_string()))?;
+
     let new_user = NewUser {
         username: &user_info.username,
-        password: &user_info.password,
+        password: &password_hash.to_string(),
     };
 
     let result = diesel::insert_into(users)
